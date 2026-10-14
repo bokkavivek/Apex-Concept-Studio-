@@ -1,94 +1,106 @@
-# simple-agent
+# Apex Concept Studio 🏎️✨
 
-Simple ReAct agent
-Agent generated with `agents-cli` version `1.4.0`
-
-## Project Structure
-
-```
-simple-agent/
-├── app/         # Core agent code
-│   ├── agent.py               # Main agent logic
-│   ├── fast_api_app.py        # FastAPI Backend server
-│   └── app_utils/             # App utilities and helpers
-├── tests/                     # Unit, integration, and load tests
-├── GEMINI.md                  # AI-assisted development guide
-└── pyproject.toml             # Project dependencies
-```
-
-> 💡 **Tip:** Use [Antigravity CLI](https://antigravity.google/) for AI-assisted development - project context is pre-configured in `GEMINI.md`.
-
-## Requirements
-
-Before you begin, ensure you have:
-- **uv**: Python package manager (used for all dependency management in this project) - [Install](https://docs.astral.sh/uv/getting-started/installation/) ([add packages](https://docs.astral.sh/uv/concepts/dependencies/) with `uv add <package>`)
-- **agents-cli**: Agents CLI - Install with `uv tool install google-agents-cli`
-- **Google Cloud SDK**: For GCP services - [Install](https://cloud.google.com/sdk/docs/install)
-
-
-## Quick Start
-
-Install `agents-cli` and its skills if not already installed:
-
-```bash
-uvx google-agents-cli setup
-```
-
-Install required packages:
-
-```bash
-agents-cli install
-```
-
-Test the agent with a local web server:
-
-```bash
-agents-cli playground
-```
-
-You can also use features from the [ADK](https://adk.dev/) CLI with `uv run adk`.
-
-## Commands
-
-| Command              | Description                                                                                 |
-| -------------------- | ------------------------------------------------------------------------------------------- |
-| `agents-cli install` | Install dependencies using uv                                                         |
-| `agents-cli playground` | Launch local development environment                                                  |
-| `agents-cli lint`    | Run code quality checks                                                               |
-| `agents-cli eval`    | Evaluate agent behavior (generate, grade, analyze, and more — see `agents-cli eval --help`) |
-| `uv run pytest tests/unit tests/integration` | Run unit and integration tests                                                        |
-| `agents-cli deploy`  | Deploy agent to Agent Runtime                                                                |
-| `agents-cli publish gemini-enterprise` | Register deployed agent to Gemini Enterprise                    || [A2A Inspector](https://github.com/a2aproject/a2a-inspector) | Launch A2A Protocol Inspector                                                        |
-
-## 🛠️ Project Management
-
-| Command | What It Does |
-|---------|--------------|
-| `agents-cli scaffold enhance` | Add CI/CD pipelines and Terraform infrastructure |
-| `agents-cli infra cicd` | One-command setup of entire CI/CD pipeline + infrastructure |
-| `agents-cli scaffold upgrade` | Auto-upgrade to latest version while preserving customizations |
+**Apex Concept Studio** is an autonomous AI-powered automotive design, engineering, and prototyping agent built on the Google Agent Development Kit (ADK) and Vertex AI Agent Platform. It assists automotive designers and engineers in exploring, benchmarking, simulating aerodynamics, visualizing, and cataloging next-generation concept vehicles.
 
 ---
 
-## Development
+## 🌟 Key Features & Wired Capabilities
 
-Edit your agent logic in `app/agent.py` and test with `agents-cli playground` - it auto-reloads on save.
+- **Automotive Prototyping & Database**: Queries, retrieves, and catalogs concept and prototype vehicle spec sheets stored in **Google Cloud Firestore**.
+- **Real-World Benchmarking**: Integrates with the public **NHTSA vPIC API** to benchmark concept specifications against real-world production vehicle lineups and global manufacturers.
+- **Aerodynamics & Physics Sandbox Simulations**: Executes Python-based aerodynamics and performance physics calculations safely in an isolated **Vertex AI Code Sandbox** (`AgentEngineSandboxCodeExecutor`).
+- **Concept Visual Generation**: Synthesizes studio-grade concept vehicle renders using **Vertex AI Imagen 3** (`imagen-3.0-generate-002`) and publishes them to a Google Cloud Storage bucket.
+- **Cross-Session Long-Term Memory**: Uses **Vertex AI Memory Bank** to automatically persist and recall designer preferences, past vehicle concepts, and constraints across sessions.
+- **Full-Stack A2A Chat Interface**: Built-in minimal **FastAPI proxy** and plain HTML/CSS/JS frontend communicating directly over the **A2A Protocol** with **A2UI card rendering**.
 
-## Deployment
+---
 
-```bash
-gcloud config set project <your-project-id>
-agents-cli deploy
+## 🏗️ Architecture
+
+```
+                                  ┌───────────────────────────┐
+                                  │   Web Browser (Chat UI)   │
+                                  └─────────────┬─────────────┘
+                                                │ (HTTP / JSON)
+                                                ▼
+                                  ┌───────────────────────────┐
+                                  │    FastAPI A2A Proxy      │
+                                  │      (frontend/)          │
+                                  └─────────────┬─────────────┘
+                                                │ (A2A Protocol / gRPC-HTTP)
+                                                ▼
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                        Vertex AI Agent Platform (Agent Runtime)                        │
+│                                                                                        │
+│                                    ┌──────────────┐                                    │
+│                                    │  root_agent  │                                    │
+│                                    └──────┬───────┘                                    │
+│                                           │                                            │
+│        ┌───────────────────┬──────────────┼──────────────┬───────────────────┐         │
+│        ▼                   ▼              ▼              ▼                   ▼         │
+│  PreloadMemoryTool   list_vehicles   query_nhtsa    generate_render    Code Sandbox    │
+│  (Memory Bank)       (Firestore)     (NHTSA API)    (Imagen 3 + GCS)   (Aerodynamics)  │
+└────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-To add CI/CD and Terraform, run `agents-cli scaffold enhance`.
-To set up your production infrastructure, run `agents-cli infra cicd`.
+---
 
-## Observability
+## 📁 Repository Structure
 
-Built-in telemetry exports to Cloud Trace, BigQuery, and Cloud Logging.
+```
+Apex-Concept-Studio-/
+├── app/
+│   ├── agent.py               # Core ADK agent, tools, callbacks, and sandbox wiring
+│   ├── fast_api_app.py        # FastAPI agent runner
+│   └── app_utils/             # Memory Bank services, A2A routes, and helpers
+├── frontend/
+│   ├── main.py                # Lightweight FastAPI A2A proxy
+│   ├── requirements.txt       # Frontend proxy dependencies
+│   └── static/
+│       └── index.html         # Plain Chat UI with native A2UI card renderer
+├── agents-cli-manifest.yaml   # Agent manifest configuration
+├── pyproject.toml             # Python dependencies and build config
+└── README.md                  # Project overview and documentation
+```
 
-## A2A Inspector
+---
 
-This agent supports the [A2A Protocol](https://a2a-protocol.org/). Use the [A2A Inspector](https://github.com/a2aproject/a2a-inspector) to test interoperability.
-See the [A2A Inspector docs](https://github.com/a2aproject/a2a-inspector) for details.
+## 🛠️ Tools & Integrations
+
+| Tool | Purpose | Integration |
+| --- | --- | --- |
+| `list_concept_vehicles` | Retrieve vehicle specs from Firestore | Google Cloud Firestore |
+| `get_concept_vehicle` | Fetch detailed specs for a specific prototype | Google Cloud Firestore |
+| `save_concept_vehicle` | Catalog a new concept vehicle | Google Cloud Firestore |
+| `query_nhtsa_models` | Search real-world manufacturer lineups | NHTSA vPIC REST API |
+| `generate_concept_render` | Synthesize photorealistic visual renders | Vertex AI Imagen 3 + Cloud Storage |
+| `code_execution` | Execute aerodynamic & physics calculations | Vertex AI Sandbox Code Executor |
+| `preload_memory` | Retrieve salient facts across sessions | Vertex AI Memory Bank |
+
+---
+
+## 🚀 Running Locally
+
+### 1. Requirements
+- Python 3.11+
+- `uv` package manager (`curl -LsSf https://astral.sh/uv/install.sh | sh`)
+- `gcloud` CLI with active Google Cloud credentials (`gcloud auth application-default login`)
+
+### 2. Backend Agent
+```bash
+# Install dependencies
+uv sync
+
+# Launch ADK Web playground with Memory Bank
+uv run adk web . --port 8080 --reload_agents
+```
+
+### 3. Frontend Chat UI
+```bash
+cd frontend
+pip install -r requirements.txt
+export AGENT_ENGINE_RESOURCE_NAME="projects/<PROJECT_NUMBER>/locations/<LOCATION>/reasoningEngines/<ENGINE_ID>"
+export AGENT_DIRECTORY="app"
+python main.py
+```
+Open **http://localhost:8080** in your browser to chat with your studio agent!
